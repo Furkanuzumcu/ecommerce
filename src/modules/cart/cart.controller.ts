@@ -32,7 +32,7 @@ export class CartController {
   @ApiOperation({ summary: 'Get current user cart' })
   @ApiResponse({ status: 200, description: 'Cart retrieved', type: CartResponseDto })
   getCart(@CurrentUser() user: { id: string }) {
-    return this.cartService.getOrCreateCart(user.id);
+    return this.cartService.getCart(user.id);
   }
 
   @Post('items')

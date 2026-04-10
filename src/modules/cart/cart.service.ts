@@ -25,18 +25,17 @@ export class CartService {
     private productRepository: Repository<Product>,
   ) {}
 
-  async getOrCreateCart(userId: string): Promise<Cart> {
+  async getCart(userId: string) {
     this.logger.log(`Getting cart for user: ${userId}`);
 
-    let cart = await this.cartRepository.findOne({
+    const cart = await this.cartRepository.findOne({
       where: { userId },
       relations: ['items', 'items.product'],
     });
 
     if (!cart) {
-      this.logger.log(`No cart found for user ${userId}, creating new cart`);
-      cart = this.cartRepository.create({ userId, items: [] });
-      await this.cartRepository.save(cart);
+      this.logger.log(`No cart found for user ${userId}, returning empty response`);
+      return { id: null, items: [], total: 0 };
     }
 
     return this.formatCart(cart);
@@ -168,7 +167,7 @@ export class CartService {
     return this.formatCart(updatedCart);
   }
 
-  async clearCart(userId: string): Promise<Cart> {
+  async clearCart(userId: string) {
     this.logger.log(`Clearing cart for user: ${userId}`);
 
     const cart = await this.cartRepository.findOne({
@@ -177,9 +176,8 @@ export class CartService {
     });
 
     if (!cart) {
-      const newCart = this.cartRepository.create({ userId, items: [] });
-      await this.cartRepository.save(newCart);
-      return this.formatCart(newCart);
+      this.logger.log(`No cart to clear for user: ${userId}`);
+      return { id: null, items: [], total: 0 };
     }
 
     if (cart.items.length > 0) {
